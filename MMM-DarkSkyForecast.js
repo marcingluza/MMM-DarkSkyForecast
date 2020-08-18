@@ -323,7 +323,7 @@ Module.register("MMM-DarkSkyForecast", {
         animatedIconName: this.weatherData.currently.icon,
         iconPath: this.generateIconSrc(this.weatherData.currently.icon),
         tempRange: this.formatHiLowTemperature(this.weatherData.daily.data[0].temperatureMax,this.weatherData.daily.data[0].temperatureMin),
-        precipitation: this.formatPrecipitation(this.weatherData.currently.precipProbability, this.weatherData.currently.precipAccumulation, this.weatherData.currently.precipIntensityMax, this.weatherData.currently.precipIntensity),
+        precipitation: this.formatPrecipitation(this.weatherData.currently.precipIntensity),
         wind: this.formatWind(this.weatherData.currently.windSpeed, this.weatherData.currently.windBearing, this.weatherData.currently.windGust),
 
       },
@@ -346,34 +346,34 @@ Module.register("MMM-DarkSkyForecast", {
     if (type == "daily") {
 
       //day name (e.g.: "MON")
-      fItem.day = this.config.label_days[moment(fData.time * 1000).format("d")];
+      fItem.day = this.config.label_days[moment(fData.dt * 1000).format("d")];
 
     } else { //hourly
 
       //time (e.g.: "5 PM")
-      fItem.time = moment(fData.time * 1000).format(this.config.label_timeFormat);
+      fItem.time = moment(fData.dt * 1000).format(this.config.label_timeFormat);
     }
 
     // --------- Icon ---------
     if (this.config.useAnimatedIcons && !this.config.animateMainIconOnly) {
       fItem.animatedIconId = this.getAnimatedIconId();
-      fItem.animatedIconName = fData.icon;
+      fItem.animatedIconName = fData.weather.icon;
     }
-    fItem.iconPath = this.generateIconSrc(fData.icon);
+    fItem.iconPath = this.generateIconSrc(fData.weather.icon);
 
     // --------- Temperature ---------
 
     if (type == "hourly") { //just display projected temperature for that hour
-      fItem.temperature = Math.round(fData.temperature) + "°";
+      fItem.temperature = Math.round(fData.temp) + "°";
     } else { //display High / Low temperatures
-      fItem.tempRange = this.formatHiLowTemperature(fData.temperatureMax,fData.temperatureMin);
+      fItem.tempRange = this.formatHiLowTemperature(fData.temp.max,fData.temp.min);
     }
 
     // --------- Precipitation ---------
-    fItem.precipitation = this.formatPrecipitation(fData.precipProbability,fData.precipAccumulation,fData.precipIntensityMax,fData.precipIntensity);
+    fItem.precipitation = this.formatPrecipitation(fData.precipitation);
 
     // --------- Wind ---------
-    fItem.wind = (this.formatWind(fData.windSpeed, fData.windBearing, fData.windGust));
+    fItem.wind = (this.formatWind(fData.wind_speed, fData.wind_deg, fData.wind_gust));
 
     return fItem;
   },
@@ -391,7 +391,7 @@ Module.register("MMM-DarkSkyForecast", {
   /*
     Returns a formatted data object for precipitation
    */
-  formatPrecipitation: function(percentChance, snowAccumulation, rainIntensityMax, rainIntensity) {
+  formatPrecipitation: function(rainIntensity) {
 
     var accumulation = null;
 
